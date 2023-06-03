@@ -66,3 +66,21 @@ tailwindcss 官方介绍为无需离开HTML即可快速构建现代网站。具�
 对于高个性化，高交互性，高定制化前台项目样式解决方案，还是原子化css形式更合适。
 
 在使用vscode开发时，我们可以安装一个`Tailwind CSS IntelliSense`插件，提示类名，来帮助我们更好的开发。
+## VueUse Vue组合式API的实用工具集
+[VueUse](http://www.vueusejs.com/), 基于Vue组合式API的实用工具集。
+
+`useWindowSize` api，响应式的获取窗口尺寸。当窗口尺寸发生变化时，实时获取。来判断是移动端UI还是pc端UI。
+
+```js
+import { computed } from 'vue'
+import { PC_DEVICE_WIDTH } from '../constants'
+import { useWindowSize } from '@vueuse/core'
+const { width } = useWindowSize()
+/**
+ * 是否是移动端设备； 判断依据： 屏幕宽度小于 PC_DEVICE_WIDTH
+ * @returns
+ */
+export const isMobileTerminal = computed(() => {
+  return width.value < PC_DEVICE_WIDTH
+})
+```
