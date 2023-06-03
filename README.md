@@ -84,3 +84,74 @@ export const isMobileTerminal = computed(() => {
   return width.value < PC_DEVICE_WIDTH
 })
 ```
+## vite开发配置
+### [配置路径别名](https://cn.vitejs.dev/config/shared-options.html#resolve-alias)
+```js
+// vite.config.js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import {join} from "path"
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [vue()],
+  resolve: {
+    alias: {
+      "@": join(__dirname, "/src")
+    }
+  }
+})
+```
+### [开发环境解决跨域](https://cn.vitejs.dev/config/server-options.html#server-proxy)
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import {join} from "path"
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [vue()],
+  resolve: {
+    alias: {
+      "@": join(__dirname, "/src")
+    }
+  },
+  server: {
+    proxy: {
+      // 代理所有 /api请求
+      "/api": {
+        target: "目标origin",
+        // 改变请求的origin为target的值
+        changeOrigin: true,
+      }
+    }
+  }
+})
+```
+### [配置环境变量](https://cn.vitejs.dev/guide/env-and-mode.html#env-files)
+企业级项目，都会区分很多环境，供我们测试试用。不能让我们的测试数据去污染线上的数据。所以vite也提供了我们环境配置文件的方式，让我们很轻松的去通过一些环境选择对应的接口地址等等。
+
+**`.env.[mode]`的格式可以在不同模加载加载不同的内容。**
+> 环境加载优先级
+>
+> - 一份用于指定模式的文件（例如 `.env.production`）会比通用形式的优先级更高（例如 `.env`）。
+>
+> - **另外，Vite 执行时已经存在的环境变量有最高的优先级，不会被 `.env` 类文件覆盖。例如当运行 `VITE_SOME_KEY=123 vite build` 的时候。**
+>
+> - `.env` 类文件会在 Vite 启动一开始时被加载，而改动会在重启服务器后生效。
+
+我们可以在源码中通过`import.meta.env.*`的方式获取以`VITE_`开头的已加载的环境变量。
+
+```js
+// .env.development
+VITE_BASE_API = "/api"
+```
+
+```json
+// package.json
+"scripts": {
+    "dev": "VITE_BASE_API=/oop vite",
+}
+```
+执行`yarn dev`后，我们可以发现，`import.meta.env.VITE_BASE_API`是命令行中指定的参数。
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ecf4f747620748cfa9eebdfff5cc596b~tplv-k3u1fbpfcp-watermark.image?)
