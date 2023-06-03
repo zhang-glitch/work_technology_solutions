@@ -1,30 +1,22 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="bg-slate-800 rounded-xl p-8 md:flex md:p-0">
+    <img src="./assets/vue.svg" alt="" class="w-24 h-24 rounded-full mx-auto md:w-48 md:h-auto md:rounded-none">
+    <div class="pt-6 text-center space-y-4 md:p-8 md:text-left">
+      <p class="text-lg font-medium text-zinc-100">111111111111111</p>
+      <div class="font-medium">
+        <div class="text-sky-400">zh-llm</div>
+        <div class="text-slate-500">解决方案</div>
+      </div>
+    </div>
   </div>
-  <HelloWorld msg="Vite + Vue" />
+  <div style="color: red; font-size: 20px"></div>
+  <div class="container clear"></div>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+<script setup>
+
+</script>
+
+<style>
+
 </style>
