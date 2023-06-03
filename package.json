@@ -10,7 +10,11 @@
   },
   "dependencies": {
     "@vueuse/core": "^10.1.2",
-    "vue": "^3.2.47"
+    "axios": "^1.4.0",
+    "md5": "^2.3.0",
+    "vue": "^3.2.47",
+    "vue-router": "^4.2.2",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.1.0",
