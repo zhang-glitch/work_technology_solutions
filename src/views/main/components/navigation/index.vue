@@ -1,6 +1,7 @@
 <template>
   <div class="navigation">
     <mobile-navigation v-if="isMobileTerminal"/>
+    <svg-icon name="back" class="w-2 h-2"></svg-icon>111
   </div>
 </template>
 <script setup>
