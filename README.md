@@ -155,3 +155,79 @@ VITE_BASE_API = "/api"
 ```
 执行`yarn dev`后，我们可以发现，`import.meta.env.VITE_BASE_API`是命令行中指定的参数。
 ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ecf4f747620748cfa9eebdfff5cc596b~tplv-k3u1fbpfcp-watermark.image?)
+## 使用svg图标作为icon图标
+首先我们需要封装一个通用的svg组件，来使用svg图标。
+```js
+<template>
+  <svg aria-hidden="true">
+    <use :xlink:href="symbolId" :fill="color" :fillClass="fillClass" />
+  </svg>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  // 图标名称
+  name: {
+    type: String,
+    required: true
+  },
+  // 颜色
+  color: {
+    type: String
+  },
+  // 类名
+  fillClass: {
+    type: String
+  }
+})
+
+// 生成图标唯一id #icon-xxx
+const symbolId = computed(() => `#icon-${props.name}`)
+</script>
+```
+然后全局注册该svg通用组件，这里我们使用插件的方式
+```js
+import SvgIcon from "./svg-icon/index.vue"
+
+export default {
+  install(app) {
+    app.component("SvgIcon", SvgIcon)
+  }
+}
+```
+main.js中直接通过use注册后，即可使用。
+```js
+    <svg-icon name="back"></svg-icon>
+```
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6be876bc2e1a4c449ed700e096428151~tplv-k3u1fbpfcp-watermark.image?)
+
+但是这样项目中并不能知道svg图标的路径，我们需要使用`vite-plugin-svg-icons`插件来指定查找路径。
+
+在vite.config.js中配置svg相关内容
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import {join} from "path"
+import {createSvgIconsPlugin} from "vite-plugin-svg-icons"
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    vue(),
+    createSvgIconsPlugin({
+      // 指定需要缓存的图标文件夹
+      iconDirs: [join(__dirname, "/src/assets/icons")],
+      // 指定symbolId格式，就是svg.use使用的href
+      symbolId: "icon-[name]"
+    })
+  ],
+})
+```
+在main.js中导入并注册svg-icons，他会把指定文件夹下的svg图片都注册在首页。
+```js
+// 注册 svg-icons
+import "virtual:svg-icons-register"
+```
+![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/92ce56211b3d499683c0ca00a79c2ac0~tplv-k3u1fbpfcp-watermark.image?)
