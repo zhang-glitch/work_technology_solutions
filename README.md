@@ -156,3 +156,41 @@ VITE_BASE_API = "/api"
 ```
 执行`yarn dev`后，我们可以发现，`import.meta.env.VITE_BASE_API`是命令行中指定的参数。
 ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ecf4f747620748cfa9eebdfff5cc596b~tplv-k3u1fbpfcp-watermark.image?)
+### 通用组件自动注册
+[vite的Glob](https://vitejs.cn/guide/features.html#glob-import) 导入功能:该功能可以帮助我们在文件系统中导入多个模块
+```js
+const modules = import.meta.glob('./dir/*.js')
+// 以上将会被转译为下面的样子：
+const modules = {
+  './dir/foo.js': () => import('./dir/foo.js'),
+  './dir/bar.js': () => import('./dir/bar.js')
+}
+```
+然后再通过vue提供的注册异步组件的方式进行引入，vue的 [defineAsyncComponent](https://cn.vuejs.org/guide/components/async.html)方法:该方法可以创建一个按需加载的异步组件 基于以上两个方法,实现组件自动注册。
+```js
+// import SvgIcon from './svg-icon/index.vue'
+// import HmPopup from './popup/index.vue'
+
+import { defineAsyncComponent } from 'vue'
+
+// const components = [SvgIcon, HmPopup]
+
+export default {
+  install(app) {
+    // components.forEach((element) => {
+    //   app.component(element.name, element)
+    // })
+    // 获取当前路径下所有文件夹下的index.vue
+    const components = import.meta.glob('./*/index.vue')
+    // 遍历获取到的组件模块
+    for (let [key, component] of Object.entries(components)) {
+      const componentName = 'hm-' + key.replace('./', '').split('/')[0]
+      // 通过 defineAsyncComponent 异步导入指定路径下的组件
+      app.component(componentName, defineAsyncComponent(component))
+    }
+  }
+}
+```
+**其实如果组件都提供了name属性，我们可以直接手动引入各组件模块，然后实现半自动注册。组件提供name的好处是，在vue-devtools中调试时方便查找各个组件。**
+
+[在vue官网中](https://cn.vuejs.org/api/options-misc.html#name)，**在 3.2.34 或以上的版本中，使用 `<script setup>` 的单文件组件会自动根据文件名生成对应的 `name` 选项，即使是在配合 `<KeepAlive>` 使用时也无需再手动声明。** 但是对于我们文件名都为index.vue的开发者来说，就没办法了。
