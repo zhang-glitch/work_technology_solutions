@@ -1,4 +1,5 @@
 import axios from "axios"
+import {getSecret} from "./index"
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_BASE_API,
@@ -16,7 +17,7 @@ service.interceptors.response.use((response) => {
 
 service.interceptors.request.use((config) => {
   config.headers = {
-    icode: "5fee98a58e2b1a3eb0e63b76376ffc9d"
+    ...getSecret()
   }
   // TODO 错误处理
   return config
