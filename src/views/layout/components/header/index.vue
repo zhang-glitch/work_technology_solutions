@@ -9,17 +9,17 @@
         src="https://m.imooc.com/static/wap/static/common/img/logo-small@2x.png"
         @click="onToHome"
       />
-      <header-search-vue class="mr-1"></header-search-vue>
-      <header-theme-vue class="mr-1"></header-theme-vue>
-      <header-my-vue></header-my-vue>
+      <header-search class="mr-1"></header-search>
+      <header-theme class="mr-1"></header-theme>
+      <header-my></header-my>
     </div>
   </div>
 </template>
 
 <script setup>
-import headerSearchVue from './header-search/index.vue'
-import headerThemeVue from './header-theme.vue'
-import headerMyVue from './header-my.vue'
+import headerSearch from './header-search/index.vue'
+import headerTheme from './header-theme.vue'
+import headerMy from './header-my.vue'
 </script>
 
 <style scoped></style>
