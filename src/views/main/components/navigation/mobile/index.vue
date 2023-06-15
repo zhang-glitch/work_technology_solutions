@@ -44,24 +44,16 @@
 </template>
 
 <script setup>
-import { ref, watch, onBeforeUpdate } from 'vue'
+import { ref, watch, onBeforeUpdate, computed } from 'vue'
 import { useScroll } from '@vueuse/core'
 // import MenuVue from '@/views/main/components/menu/index.vue'
 import { useStore } from 'vuex'
-import { getCategoryList } from '@/api/category'
 import MenuVue from '../../menu/index.vue'
 
 const store = useStore()
-
-const categorys = ref([])
 const currentCategoryIndex = ref(0)
 
-const getCategoryData = async () => {
-  const res = await getCategoryList()
-  categorys.value = [{ id: 'all', name: '全部' }, ...res.categorys]
-}
-
-getCategoryData()
+const categorys = computed(() => store.getters.categorys)
 
 // 滑块
 const sliderStyle = ref({

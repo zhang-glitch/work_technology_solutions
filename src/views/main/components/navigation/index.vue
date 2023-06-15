@@ -1,11 +1,15 @@
 <template>
   <div class="navigation">
     <mobile-navigation v-if="isMobileTerminal" />
-    <hm-svg-icon name="back" class="w-2 h-2"></hm-svg-icon>
+    <pc-navigation v-else></pc-navigation>
   </div>
 </template>
 <script setup>
 import { isMobileTerminal } from '@/utils/flexible'
 import MobileNavigation from './mobile/index.vue'
+import PcNavigation from './pc/index.vue'
+import { useStore } from 'vuex'
+const store = useStore()
+store.dispatch('category/getCategoryList')
 </script>
 <style scoped></style>
