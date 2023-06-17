@@ -2,7 +2,7 @@
   <hm-popover>
     <template #reference>
       <hm-svg-icon
-        name="theme-light"
+        :name="themeIconName"
         class="guide-theme w-4 h-4 p-1 cursor-pointer rounded-sm duration-200 outline-none hover:bg-zinc-100/60 dark:hover:bg-zinc-900"
         fillClass="fill-zinc-900 dark:fill-zinc-300"
       ></hm-svg-icon>
@@ -13,6 +13,7 @@
         class="flex items-center p-1 cursor-pointer rounded hover:bg-zinc-100/60 dark:hover:bg-zinc-800"
         v-for="item in themeArr"
         :key="item.id"
+        @click="handleHeaderTheme(item)"
       >
         <hm-svg-icon
           :name="item.icon"
@@ -53,6 +54,25 @@ const themeArr = [
     name: '跟随系统'
   }
 ]
+
+/**
+ * 主题切换实现思路
+ * 1. 监听主题切换行为
+ * 2. 根据行为保存当前需要展示的主题到 vuex 中
+ * 3. 根据 vuex 中保存的当前主题，展示 header-theme 下的显示图标
+ * 4. 根据 vuex 中保存的当前主题，修改 html 的class
+ */
+const store = useStore()
+const handleHeaderTheme = (item) => {
+  store.commit('theme/setThemeType', item.type)
+}
+// 获取当前主题图标
+const themeIconName = computed(() => {
+  const currentTheme = themeArr.find(
+    (item) => item.type === store.getters.themeType
+  )
+  return currentTheme?.icon
+})
 </script>
 
 <style lang="scss" scoped></style>

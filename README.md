@@ -337,3 +337,106 @@ const store = createStore({
 ```
 
 ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dbd5e52112cf4f889ae5ac4dc54638bf~tplv-k3u1fbpfcp-watermark.image?)
+## 主题切换实现
+[以前写过主题替换的demo](https://juejin.cn/post/7153893557344927751#heading-3)
+
+原理： **通过类名的切换使得html元素在不同类名下展示不同的样式**
+
+**实现思路**：（此方案基于[tailwindcss插件](https://www.tailwindcss.cn/docs/dark-mode)）
+
+tailwind.config.js配置文件需要加上
+```js
+  darkMode: 'class'
+```
+
+-  将当前主题类型存储在vuex中
+```js
+// 当前主题模式
+import { THEME_LIGHT } from '@/constants'
+export default {
+  namespaced: true,
+  state: () => ({
+    themeType: THEME_LIGHT
+  }),
+  mutations: {
+    setThemeType(state, theme) {
+      state.themeType = theme
+    }
+  }
+}
+```
+-  当切换主题时修改vuex中的主题类型
+```js
+const handleHeaderTheme = (item) => {
+  store.commit('theme/setThemeType', item.type)
+}
+```
+-  监听主题类型的变化： theme-light 、 theme-dark、theme-system、给html标签动态设置class的属性值。他就是在切换时，给html元素添加到对应主题css前缀。从而达到切换主题的效果
+```html
+    <html lang="en" class="dark">
+        <!-- 添加暗黑模式css样式，前面加上dark前缀即可 -->
+        <div class="bg-zinc-300 dark:bg-zinc-900" ></div>
+    </html>
+```
+-  html的class属性值变化后会匹配到对应主题的class、从而展示出来对应的主题的颜色
+-  给标签设置两套的类名：白色一套、暗色一套
+```html
+   <div class="bg-zinc-300 dark:bg-zinc-900" ></div>
+```
+其中跟随系统的主题变化，需要用到 [Window.matchMedia()](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/matchMedia)，该方法接收一个mediaQueryString（媒体查询解析的字符串），该字符串我们可以传递[prefers-color-scheme](https://developer.mozilla.org/zh-CN/docs/Web/CSS/@media/prefers-color-scheme),即 `window.matchMedia('(prefers-color-scheme: dark)')`方法即可返回一个[`MediaQueryList`](https://developer.mozilla.org/zh-CN/docs/Web/API/MediaQueryList) 对象。
+- 该对象存在一个[`change`事件](https://developer.mozilla.org/zh-CN/docs/Web/API/MediaQueryList/change_event)，可以监听系统主题发生变更。
+- 事件对象[`matches`属性](https://developer.mozilla.org/zh-CN/docs/Web/API/MediaQueryList/matches)可以判断为啥主题。（true: 深色主题，false: 浅色主题）。
+
+主题修改工具函数
+```js
+import { watch } from 'vue'
+import store from '../store'
+import { THEME_DARK, THEME_LIGHT, THEME_SYSTEM } from '../constants'
+
+/**
+ * 监听系统主题变化
+ */
+let matchMedia = ''
+function changeSystemTheme() {
+  // 仅需初始化一次即可
+  if (matchMedia) return
+  matchMedia = window.matchMedia('(prefers-color-scheme: dark)')
+
+  // 这里也是监听主题切换，然后调用修改html class
+  matchMedia.addEventListener('change', (event) => {
+    changeTheme(THEME_SYSTEM)
+  })
+}
+
+/**
+ * 主题匹配函数
+ * @param val {*} 主题标记
+ */
+const changeTheme = (val) => {
+  let htmlClass = ''
+  if (val === THEME_LIGHT) {
+    // 浅色主题
+    htmlClass = THEME_LIGHT
+  } else if (val === THEME_DARK) {
+    // 深色主题
+    htmlClass = THEME_DARK
+  } else {
+    // 跟随系统
+    changeSystemTheme()
+    // true是深色模式， false是浅色主题
+    htmlClass = matchMedia.matches ? THEME_DARK : THEME_LIGHT
+  }
+  document.querySelector('html').className = htmlClass
+}
+
+/**
+ * 初始化主题
+ */
+export default () => {
+  // 监听主题切换，修改html class的值
+  watch(() => store.getters.themeType, changeTheme, {
+    immediate: true
+  })
+}
+
+```

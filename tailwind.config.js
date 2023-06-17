@@ -1,5 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  // 手动切换暗模式,可以通过data-mode自定义css前缀名字。默认是dark
+  // darkMode: ['class', '[data-mode="dark"]'],
+  darkMode: 'class',
   // tailwindcss 应用的文件范围
   content: ['./index.html', './src/**/*.{vue,js}'],
   theme: {
