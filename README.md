@@ -337,19 +337,23 @@ const store = createStore({
 ```
 
 ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dbd5e52112cf4f889ae5ac4dc54638bf~tplv-k3u1fbpfcp-watermark.image?)
+
 ## 主题切换实现
-[以前写过主题替换的demo](https://juejin.cn/post/7153893557344927751#heading-3)
 
-原理： **通过类名的切换使得html元素在不同类名下展示不同的样式**
+[以前写过主题替换的 demo](https://juejin.cn/post/7153893557344927751#heading-3)
 
-**实现思路**：（此方案基于[tailwindcss插件](https://www.tailwindcss.cn/docs/dark-mode)）
+原理： **通过类名的切换使得 html 元素在不同类名下展示不同的样式**
 
-tailwind.config.js配置文件需要加上
+**实现思路**：（此方案基于[tailwindcss 插件](https://www.tailwindcss.cn/docs/dark-mode)）
+
+tailwind.config.js 配置文件需要加上
+
 ```js
-  darkMode: 'class'
+darkMode: 'class'
 ```
 
--  将当前主题类型存储在vuex中
+- 将当前主题类型存储在 vuex 中
+
 ```js
 // 当前主题模式
 import { THEME_LIGHT } from '@/constants'
@@ -365,29 +369,38 @@ export default {
   }
 }
 ```
--  当切换主题时修改vuex中的主题类型
+
+- 当切换主题时修改 vuex 中的主题类型
+
 ```js
 const handleHeaderTheme = (item) => {
   store.commit('theme/setThemeType', item.type)
 }
 ```
--  监听主题类型的变化： theme-light 、 theme-dark、theme-system、给html标签动态设置class的属性值。他就是在切换时，给html元素添加到对应主题css前缀。从而达到切换主题的效果
+
+- 监听主题类型的变化： theme-light 、 theme-dark、theme-system、给 html 标签动态设置 class 的属性值。他就是在切换时，给 html 元素添加到对应主题 css 前缀。从而达到切换主题的效果
+
 ```html
-    <html lang="en" class="dark">
-        <!-- 添加暗黑模式css样式，前面加上dark前缀即可 -->
-        <div class="bg-zinc-300 dark:bg-zinc-900" ></div>
-    </html>
+<html lang="en" class="dark">
+  <!-- 添加暗黑模式css样式，前面加上dark前缀即可 -->
+  <div class="bg-zinc-300 dark:bg-zinc-900"></div>
+</html>
 ```
--  html的class属性值变化后会匹配到对应主题的class、从而展示出来对应的主题的颜色
--  给标签设置两套的类名：白色一套、暗色一套
+
+- html 的 class 属性值变化后会匹配到对应主题的 class、从而展示出来对应的主题的颜色
+- 给标签设置两套的类名：白色一套、暗色一套
+
 ```html
-   <div class="bg-zinc-300 dark:bg-zinc-900" ></div>
+<div class="bg-zinc-300 dark:bg-zinc-900"></div>
 ```
-其中跟随系统的主题变化，需要用到 [Window.matchMedia()](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/matchMedia)，该方法接收一个mediaQueryString（媒体查询解析的字符串），该字符串我们可以传递[prefers-color-scheme](https://developer.mozilla.org/zh-CN/docs/Web/CSS/@media/prefers-color-scheme),即 `window.matchMedia('(prefers-color-scheme: dark)')`方法即可返回一个[`MediaQueryList`](https://developer.mozilla.org/zh-CN/docs/Web/API/MediaQueryList) 对象。
+
+其中跟随系统的主题变化，需要用到 [Window.matchMedia()](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/matchMedia)，该方法接收一个 mediaQueryString（媒体查询解析的字符串），该字符串我们可以传递[prefers-color-scheme](https://developer.mozilla.org/zh-CN/docs/Web/CSS/@media/prefers-color-scheme),即 `window.matchMedia('(prefers-color-scheme: dark)')`方法即可返回一个[`MediaQueryList`](https://developer.mozilla.org/zh-CN/docs/Web/API/MediaQueryList)  对象。
+
 - 该对象存在一个[`change`事件](https://developer.mozilla.org/zh-CN/docs/Web/API/MediaQueryList/change_event)，可以监听系统主题发生变更。
 - 事件对象[`matches`属性](https://developer.mozilla.org/zh-CN/docs/Web/API/MediaQueryList/matches)可以判断为啥主题。（true: 深色主题，false: 浅色主题）。
 
 主题修改工具函数
+
 ```js
 import { watch } from 'vue'
 import store from '../store'
@@ -438,5 +451,278 @@ export default () => {
     immediate: true
   })
 }
-
 ```
+
+## 实现瀑布流布局
+
+整个瀑布流组件的构建大体需要分成几部分
+
+1. 通过 props 传递关键数据
+
+   - data：数据源
+
+   - nodeKey：唯一标识
+
+   - column：渲染的列数
+
+   - columnSpacing：列间距
+   - rowSpacing：行间距
+   - picturePreReading：是否需要图片预渲染
+
+2. 瀑布流渲染机制：通过 absolute 配合 relative 完成布局，布局逻辑为：每个 item 应该横向排列，第二行的 item 顺序连接到当前最短的列中。
+
+3. 通过作用域插槽 将每个 item 中涉及到的关键数据，传递到 item 视图中。
+
+### 计算每列宽度
+
+计算大体方法就是，拿到容器宽度(不包括 margin,padding,border)，
+
+```js
+const useContainerWidth = () => {
+  const { paddingLeft, paddingRight } = getComputedStyle(
+    containerRef.value,
+    null
+  )
+  // 容器左边距
+  containerLeft.value = parseFloat(paddingLeft)
+  // 容器宽度
+  containerWidth.value =
+    containerRef.value.offsetWidth -
+    parseFloat(paddingLeft) -
+    parseFloat(paddingRight)
+}
+```
+
+并且获取容器中每个 item 元素的总间距。
+
+```js
+// 列间距总大小 (column - 1) * columnSpacing
+const columnSpacingTotal = computed(() => {
+  return (props.column - 1) * props.columnSpacing
+})
+```
+
+然后用当前容器减去总间距，再除以列数。
+
+```js
+const useColumnWidth = () => {
+  // 获取容器宽度
+  useContainerWidth()
+  // 获取列宽
+  columnWidth.value =
+    (containerWidth.value - columnSpacingTotal.value) / props.column
+}
+```
+
+### 获取每个元素的高度
+
+图片是否定义了高度，如果定义高度，可以直接计算出每个 item 的高度
+
+```js
+const useItemHeight = () => {
+  // 初始化item高度列表
+  itemsHeight = []
+  // 获取 item 元素
+  const itemElements = [...document.getElementsByClassName('hm-waterfall-item')]
+  // 获取item高度
+  itemElements.forEach((itemEl) => {
+    itemsHeight.push(itemEl.offsetHeight)
+  })
+  // 渲染位置
+  useItemLocation()
+}
+```
+
+如果未定义高度，我们需要在图片加载完成后，才能计算高度。
+
+- 获取 item 元素
+- 获取 itm 元素中图片路径
+
+```js
+/**
+ * 获取所有item中img元素
+ */
+
+export function getImgElements(itemElements) {
+  const imgElements = []
+  itemElements.forEach((el) => {
+    imgElements.push(...el.getElementsByTagName('img'))
+  })
+  return imgElements
+}
+
+/**
+ * 获取所有图片路径
+ */
+
+export function getAllImgSrc(imgElements) {
+  const allImgSrc = []
+  imgElements.forEach((item) => {
+    allImgSrc.push(item.getAttribute('src'))
+  })
+  return allImgSrc
+}
+```
+
+- 通过 image 对象的 load 事件来判断图片是否加载完毕，然后计算高度。
+
+```js
+export function allImgComplete(allImgSrc) {
+  // 存放所有图片加载的promise对象
+  const promises = []
+  // 循环allImgSrc
+  allImgSrc.forEach((imgSrc, index) => {
+    promises.push(
+      new Promise((resolve) => {
+        const imgObj = new Image()
+        imgObj.src = imgSrc
+        imgObj.onload = () => {
+          resolve({
+            imgSrc,
+            index
+          })
+        }
+      })
+    )
+  })
+  return Promise.all(promises)
+}
+```
+
+```js
+const waitImgComplete = () => {
+  // 初始化item高度列表
+  itemsHeight = []
+  // 获取 item 元素
+  const itemElements = [...document.getElementsByClassName('hm-waterfall-item')]
+  // 获取所有元素的 img 标签
+  const imgElements = getImgElements(itemElements)
+  // 获取所有 img 图片路径
+  const allImgSrc = getAllImgSrc(imgElements)
+  // 计算图片预加载，然后计算高度
+  allImgComplete(allImgSrc).then(() => {
+    itemElements.forEach((itemEl) => {
+      itemsHeight.push(itemEl.offsetHeight)
+    })
+  })
+  // 渲染位置
+  useItemLocation()
+}
+```
+
+### 计算每个元素的偏移量
+
+**都是通过获取列最小高度基础上计算的一些值。**
+
+需要先将每列高度初始化为 0，使用该对象作为容器，key 为列下标，值为列高度。
+
+```js
+// 容器的总高度
+const containerHeight = ref(0)
+// 记录每列高度的容器。key：所在列  val：列高
+const columnHeightObj = ref({})
+/**
+ * 构建记录各列的高度的对象。初始化都为0
+ */
+const useColumnHeightObj = () => {
+  columnHeightObj.value = {}
+  for (let i = 0; i < props.column; i++) {
+    columnHeightObj.value[i] = 0
+  }
+}
+```
+
+获取 left 偏移量时，我们需要拿到最小高度列。
+
+```js
+/**
+ * 获取最小高度
+ */
+
+export function getMinHeight(columnHeightObj) {
+  const columnHeightValue = Object.values(columnHeightObj)
+  return Math.min(...columnHeightValue)
+}
+
+/**
+ * 获取最小高度的column
+ */
+
+export function getMinHeightColumn(columnHeightObj) {
+  // 获取最小高度
+  const minHeight = getMinHeight(columnHeightObj)
+  const columns = Object.keys(columnHeightObj)
+  const minHeightColumn = columns.find((col) => {
+    return columnHeightObj[col] === minHeight
+  })
+  return minHeightColumn
+}
+```
+
+获取最小高度列后，直接乘以列宽和加上间距就行
+
+```js
+/**
+ * 计算当前元素的left偏移量
+ */
+const getItemLeft = () => {
+  // 获取最小高度的列
+  const column = getMinHeightColumn(columnHeightObj.value)
+  // 计算left
+  return (
+    (columnWidth.value + props.columnSpacing) * column + containerLeft.value
+  )
+}
+```
+
+top 偏移量的计算，我们可以直接拿到最小高度列高就行
+
+```js
+/**
+ * 计算当前元素的top偏移量
+ */
+const getItemTop = () => {
+  // 获取列最小高度
+  const minHeight = getMinHeight(columnHeightObj.value)
+  return minHeight
+}
+```
+
+**需要注意的是，我们在完成每次元素偏移量赋值的时候，都需要将最小高度列重新计算高度。**
+
+```js
+/**
+ * 重新计算最小高度列高度
+ */
+const increasingHeight = (index) => {
+  // 获取最小高度的列
+  const column = getMinHeightColumn(columnHeightObj.value)
+  // 该列高度重新计算
+  columnHeightObj.value[column] =
+    columnHeightObj.value[column] + itemsHeight[index] + props.rowSpacing
+}
+```
+
+最后将最大高度列高度赋值给容器高度即可。
+
+```js
+// 渲染位置
+const useItemLocation = () => {
+  props.data.forEach((item, index) => {
+    // 避免重复计算
+    if (item._style) return
+
+    // 拿到最小高度，计算_style中的left， top
+    item._style = {}
+    item._style.left = getItemLeft()
+    item._style.top = getItemTop()
+    // 每次设置完偏移量时，都需要更改最短列的高度。
+    increasingHeight(index)
+  })
+
+  // 当所有item设置好偏移量时，将容器高度设置为列最高的高度
+  containerHeight.value = getMaxHeight(columnHeightObj.value)
+}
+```
+
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/waterfall-component)
