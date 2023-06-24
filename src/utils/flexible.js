@@ -1,14 +1,18 @@
 import { computed } from 'vue'
-// import { PC_DEVICE_WIDTH } from '@/constants'
+import { PC_DEVICE_WIDTH } from '@/constants'
+import { useWindowSize } from '@vueuse/core'
+
+const { width } = useWindowSize()
 /**
  * 是否是移动端设备； 判断依据： 屏幕宽度小于 PC_DEVICE_WIDTH
  * @returns
  */
 export const isMobileTerminal = computed(() => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  )
-  // return width.value < PC_DEVICE_WIDTH
+  // 数据非响应，只会执行一次。computed缓存了
+  // return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+  //   navigator.userAgent
+  // )
+  return width.value < PC_DEVICE_WIDTH
 })
 
 /**
