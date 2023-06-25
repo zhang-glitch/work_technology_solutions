@@ -27,7 +27,7 @@
           'text-zinc-100 ': currentCategoryIndex === index
         }"
         :ref="setItemRef"
-        @click="onItemClick(index)"
+        @click="onItemClick(item)"
       >
         {{ item.name }}
       </li>
@@ -51,7 +51,7 @@ import { useStore } from 'vuex'
 import MenuVue from '../../menu/index.vue'
 
 const store = useStore()
-const currentCategoryIndex = ref(0)
+const currentCategoryIndex = computed(() => store.getters.currentCategoryIndex)
 
 const categorys = computed(() => store.getters.categorys)
 
@@ -90,8 +90,10 @@ watch(currentCategoryIndex, (val) => {
 // popup 展示
 const isOpenPopup = ref(false)
 // item 点击事件
-const onItemClick = (index) => {
-  currentCategoryIndex.value = index
+const onItemClick = (item) => {
+  // currentCategoryIndex.value = index
+  // 改变当前currentCategory
+  store.commit('app/setCurrentCategory', item)
   isOpenPopup.value = false
 }
 </script>

@@ -3,7 +3,7 @@
  */
 
 import { getCategoryList } from '@/api/category'
-import { CATEGORY_NOMAR_DATA } from '@/constants'
+import { CATEGORY_NOMAR_DATA, ALL_CATEGORY } from '@/constants'
 export default {
   namespaced: true,
   state: () => {
@@ -14,7 +14,7 @@ export default {
   mutations: {
     // 获取categorys数据
     setCategorys(state, categorys) {
-      state.categorys = [{ id: 'all', name: '全部' }, ...categorys]
+      state.categorys = [ALL_CATEGORY, ...categorys]
     }
   },
   actions: {

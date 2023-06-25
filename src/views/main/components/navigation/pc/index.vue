@@ -26,7 +26,7 @@
           'text-zinc-900 dark:text-zinc-300 bg-zinc-200 dark:bg-zinc-900':
             currentIndex == index
         }"
-        @click="onItemClick(index)"
+        @click="onItemClick(item)"
       >
         {{ item.name }}
       </li>
@@ -35,7 +35,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useStore } from 'vuex'
 
 /**
  * 状态切换处理
@@ -48,9 +49,12 @@ const triggerState = () => {
 /**
  * 选中状态处理
  */
-const currentIndex = ref(0)
-const onItemClick = (index) => {
-  currentIndex.value = index
+const store = useStore()
+const currentIndex = computed(() => store.getters.currentCategoryIndex)
+const onItemClick = (item) => {
+  // currentIndex.value = index
+  // 改变当前currentCategory
+  store.commit('app/setCurrentCategory', item)
 }
 </script>
 

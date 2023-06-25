@@ -20,14 +20,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import getList from '@/api/list.js'
 import { isMobileTerminal } from '@/utils/flexible'
 import ItemVue from './item.vue'
+import { useStore } from 'vuex'
 
-const query = {
+let query = {
   // 如果将请求数据数量该小，将不能撑满首屏,将不能再次获取数据
-  size: 5,
+  size: 20,
   page: 1
 }
 const listData = ref([])
@@ -59,7 +60,29 @@ const getListData = async () => {
   }
 }
 
+// 因为我们有了长列表，就不需要手动触发请求。
 // getListData()
+
+// 监听currentCategory变化，触发请求
+const resetQuery = (newQuery) => {
+  query = { ...query, ...newQuery }
+  // 初始化数据
+  isFinished.value = false
+  // 当数据为空，那么将自动触发请求
+  listData.value = []
+}
+
+const store = useStore()
+
+watch(
+  () => store.getters.currentCategory,
+  (currentCategory) => {
+    resetQuery({
+      page: 1,
+      categoryId: currentCategory.id
+    })
+  }
+)
 </script>
 
 <style scoped></style>

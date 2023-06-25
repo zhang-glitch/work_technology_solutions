@@ -10,7 +10,7 @@
           'text-red-600': index == currentCategoryIndex ? true : false,
           'text-zinc-900': index == currentCategoryIndex ? false : true
         }"
-        @click="$emit('handleItem', index)"
+        @click="$emit('handleItem', item)"
       >
         {{ item.name }}
       </li>

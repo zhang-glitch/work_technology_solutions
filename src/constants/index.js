@@ -1,5 +1,8 @@
 export const PC_DEVICE_WIDTH = 1280
 
+// 全部分类
+export const ALL_CATEGORY = { id: 'all', name: '全部' }
+
 // 暗黑主题
 export const THEME_DARK = 'dark'
 // 浅色主题
@@ -9,7 +12,7 @@ export const THEME_SYSTEM = 'system'
 
 // 初始 category 数据
 export const CATEGORY_NOMAR_DATA = [
-  { id: 'all', name: '全部' },
+  ALL_CATEGORY,
   { id: 'web_app_icon', name: 'UI/UX' },
   { id: 'design', name: '平面' },
   { id: 'illustration', name: '插画/漫画' },
