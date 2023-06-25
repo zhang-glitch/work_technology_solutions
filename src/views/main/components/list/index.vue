@@ -1,15 +1,21 @@
 <template>
   <div>
-    <hm-waterfall
-      class="w-full px-1"
-      :data="listData"
-      :column="isMobileTerminal ? 2 : 5"
-      :picturePreReading="false"
+    <hm-infinite-list
+      v-model:isLoading="isLoading"
+      :isFinished="isFinished"
+      @load="getListData"
     >
-      <template v-slot="{ item, width }">
-        <item-vue :data="item" :columnWidth="width"></item-vue>
-      </template>
-    </hm-waterfall>
+      <hm-waterfall
+        class="w-full px-1"
+        :data="listData"
+        :column="isMobileTerminal ? 2 : 5"
+        :picturePreReading="false"
+      >
+        <template v-slot="{ item, width }">
+          <item-vue :data="item" :columnWidth="width"></item-vue>
+        </template>
+      </hm-waterfall>
+    </hm-infinite-list>
   </div>
 </template>
 
@@ -19,18 +25,41 @@ import getList from '@/api/list.js'
 import { isMobileTerminal } from '@/utils/flexible'
 import ItemVue from './item.vue'
 
-const query = ref({
-  size: 20,
+const query = {
+  // 如果将请求数据数量该小，将不能撑满首屏,将不能再次获取数据
+  size: 5,
   page: 1
-})
+}
 const listData = ref([])
 
+// loading
+const isLoading = ref(false)
+// isFinished
+const isFinished = ref(false)
+
 const getListData = async () => {
+  // 数据加载完成，直接阻止请求
+  if (isFinished.value) return
+
+  // 第一次请求不需要增加page
+  if (listData.value.length) {
+    query.page += 1
+  }
   const res = await getList(query)
-  listData.value = res.list
+
+  listData.value = [...listData.value, ...res.list]
+  // 修改加载状态
+  isLoading.value = false
+  // 请求数据为0时，改变加载完成状态
+  // if (!res.list.length) {
+  //   isFinished.value = true
+  // }
+  if (listData.value.length === res.total) {
+    isFinished.value = true
+  }
 }
 
-getListData()
+// getListData()
 </script>
 
 <style scoped></style>

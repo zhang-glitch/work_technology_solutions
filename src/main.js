@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router'
 import { useREM } from './utils/flexible'
 import libs from './libs'
+import directives from './directives'
 import store from './store'
 // 注册 svg-icons
 import 'virtual:svg-icons-register'
@@ -15,4 +16,4 @@ window.onresize = useREM
 
 useTheme()
 
-createApp(App).use(router).use(store).use(libs).mount('#app')
+createApp(App).use(router).use(store).use(libs).use(directives).mount('#app')
