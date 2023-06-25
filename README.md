@@ -726,3 +726,115 @@ const useItemLocation = () => {
 ```
 
 [案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/waterfall-component)
+## 长列表加载组件
+主要是通过监听底部dom是否出现在可视区域，然后做数据请求，处理一些特殊情况。使用到了
+[usevue的useIntersectionObserver api](http://www.vueusejs.com/core/useIntersectionObserver/) ，它就是简单了对 [IntersectionObserver api](https://developer.mozilla.org/zh-CN/docs/Web/API/IntersectionObserver)进行了封装，让我们更轻易地实现可见区域交叉监听。
+
+这个IntersectionObserver 以前写过一篇文章 [《如何判断元素是否在可视区域内呢？然后搞一些事情》](https://juejin.cn/post/7006521586836570126)介绍过，可以看看。
+
+主要提供`isLoading`展示加载更多动态图标， `isFinished`判断数据是否请求完毕， `load`事件请求数据 props即可。
+```js
+<script setup>
+import { useVModel, useIntersectionObserver } from '@vueuse/core'
+import { onUnmounted, ref, watch } from 'vue'
+
+const props = defineProps({
+  isLoading: {
+    type: Boolean,
+    default: false
+  },
+  isFinished: {
+    type: Boolean,
+    default: false
+  }
+})
+
+// 定义loading绑定事件，加载更多事件
+const emits = defineEmits(['update:isLoading', 'load'])
+
+const loading = useVModel(props, 'isLoading', emits)
+// 加载更多
+const loadingRef = ref(null)
+// 第一次加载，可见区域就是true，数据加载完成可见区域变成false
+// 如果可见区域不是交替可见，那么回调不会执行
+
+// 记录当前是否在底部（是否交叉）
+const targetIsIntersecting = ref(false)
+useIntersectionObserver(loadingRef, ([{ isIntersecting }]) => {
+  // console.log(isIntersecting, props.isFinished, loading.value)
+  targetIsIntersecting.value = isIntersecting
+  emitLoad()
+})
+
+const emitLoad = () => {
+  // 出现底部区域，数据未加载完成，loading为false时，请求数据
+  if (targetIsIntersecting.value && !props.isFinished && !loading.value) {
+    loading.value = true
+    emits('load')
+  }
+}
+
+/**
+ * 处理首次数据加载为盛满全屏时，可见区域判断回调只执行一次的bug
+ *
+ * 监听loading变化，重新触发执行
+ */
+let timer = null
+watch(loading, () => {
+  // false => true（延迟请求数据，等上一次请求完毕后，在执行）=> false
+  // 触发 load，延迟处理，等待 渲染（虽然数据请求回来，但是ui为渲染，所以targetIsIntersecting依旧为true）和 useIntersectionObserver 的再次触发
+  // 当一次加载数据可以盛满容器，那么当loading发生变化时，不让其加载数据。因为targetIsIntersecting为false。这个延时的时间要大于targetIsIntersecting改变后的时间
+
+  // 但是对于一次加载数据不可以盛满容器的情况。targetIsIntersecting始终未true，就可以在首屏加载两次了。等下一次watch执行，刚好延迟让targetIsIntersecting改变为false后，在触发emitLoad。这时刚好阻止请求了
+  timer = setTimeout(() => {
+    emitLoad()
+  }, 500)
+})
+
+onUnmounted(() => {
+  clearTimeout(timer)
+})
+</script>
+```
+这里有一个容易出现的bug，当我们数据量一次返回过少时，底部区域一直在可是区域内，我们将不能再次调用`useIntersectionObserver`传入的回调，也就不能再次请求数据，加载更多了。
+
+所以我们需要监听loading的变化，再次触发数据请求。但是这样又有一个问题了。当我们数据一次性加载过多时，我们依旧请求多次数据，这是因为虽然第一次请求的数据回来了，但是界面还没有渲染，这是底部区域依旧在可是区域内，导致数据再一次被请求。所以我们手动延迟数据在watch监听中的请求。
+
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/infinite-list-component)
+## 自定义懒加载指令
+也是需要用到[usevue的useIntersectionObserver api](http://www.vueusejs.com/core/useIntersectionObserver/)，首先将src置空，当进入可视区域，我们就将src赋值回去。
+```js
+import { useIntersectionObserver } from '@vueuse/core'
+
+export default {
+  mounted(el) {
+    // 保存图片路径
+    const imgSrc = el.getAttribute('src')
+    // 将图片src置空
+    el.setAttribute('src', '')
+
+    // 监听图片的可见
+    const { stop } = useIntersectionObserver(el, ([{ isIntersecting }]) => {
+      if (isIntersecting) {
+        el.setAttribute('src', imgSrc)
+        // 停止监听
+        stop()
+      }
+    })
+  }
+}
+```
+通过[vite的Glob](https://vitejs.cn/guide/features.html#glob-import) 的另一个方法来做到指令自动注册。使用 `import.meta.globEager`，直接引入所有的模块。
+```js
+export default {
+  install(app) {
+    // 获取到所有指令模块对象
+    const modules = import.meta.globEager('./modules/*.js')
+    for (let [key, value] of Object.entries(modules)) {
+      const directiveName = key.replace('./modules/', '').split('.')[0]
+      app.directive(directiveName, value.default)
+    }
+  }
+}
+```
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/infinite-list-component)
