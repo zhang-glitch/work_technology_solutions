@@ -11,3 +11,16 @@ export default function getList(data) {
     params: data
   })
 }
+
+/**
+ * 获取搜索关键词列表数据
+ */
+
+export const getHint = (q) => {
+  return request({
+    url: '/pexels/hint',
+    params: {
+      q
+    }
+  })
+}

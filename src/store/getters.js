@@ -11,5 +11,7 @@ export default {
     return getters.categorys.findIndex((item) => {
       return item.id === getters.currentCategory.id
     })
-  }
+  },
+  // 历史数据
+  historyWords: (state) => state.search.historyWords
 }
