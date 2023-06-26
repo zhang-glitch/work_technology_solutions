@@ -838,3 +838,130 @@ export default {
 }
 ```
 [案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/infinite-list-component)
+## confirm组件
+`confirm` 组件的实现思路:
+
+1. 创建一个`confirm`组件 
+2. 创建一个函数组件，并且返回一个 `promise`
+
+3. 同时利用h函数生成`confirm`组件的`vnode`
+4. 最后利用`render`函数，渲染`vnode`到 `body`中
+
+了解了组件的设计思路，我们就需要分析它应该具有的props
+```js
+const props = defineProps({
+  title: {
+    type: String
+  },
+  content: {
+    type: String,
+    required: true
+  },
+  // 按钮文字
+  cancelText: {
+    type: String,
+    default: '取消'
+  },
+  confirmText: {
+    type: String,
+    default: '确定'
+  },
+  // 取消和确认时触发事件, 例如移除dom
+  closeAfter: {
+    type: Function
+  },
+  /**
+   * 主要是区分点击了取消还是确定
+   */
+  // 点击确定触发事件
+  handleConfirmClick: {
+    type: Function
+  },
+  // 点击取消触发事件
+  handleCancelClick: {
+    type: Function
+  }
+})
+```
+对于confirm组件来说，我们通过一个响应式数据来控制显示和隐藏实现的动画。
+
+- 在弹出框出现时，我们需要监听挂载的时刻，然后控mask和弹框的显示，不然动画会失效。
+
+- 再点击关闭弹出框时，我们不能立刻让组件卸载，不然动画也会立刻消失，所以我们延时卸载。
+```js
+// 动画时间 状态驱动的动态css
+const actionDuration = '0.5s'
+
+// 控制confirm显隐
+const isVisible = ref(false)
+
+// 组件挂载就让弹框显示，通过函数组件控制组件挂载卸载
+// 通过mounted， 让其挂载时有动画效果
+onMounted(() => {
+  isVisible.value = true
+})
+
+/**
+ * 关闭弹窗
+ * 通过定时器，让动画完成后在移除dom
+ */
+const handleClose = () => {
+  // 当隐藏时才会出现动画
+  isVisible.value = false
+  setTimeout(() => {
+    // 卸载confirm组件
+    props.closeAfter()
+  }, actionDuration.replace('0.', '').replace('s', '') * 100)
+}
+```
+函数组件的封装，主要使用`h, render`函数操作。
+- `closeAfter`：主要就是在点击任何地方关闭弹框时，卸载组件。
+- `handleConfirmClick`: 主要是点击确认按钮时，让promise状态为fulfilled，让外界使用函数组件时，在then中可以操作确认后的事情。
+- `handleCancelClick`: 主要是点击取消按钮时，让promise状态为rejected，让外界使用函数组件时，在catch中可以操作取消后的事情。
+
+**后两个函数主要就是为了区分点击了取消还是确认。**
+```js
+import { h, render } from 'vue'
+import Confirm from './index.vue'
+
+export default function createConfirm({
+  title,
+  content,
+  cancelText = '取消',
+  confirmText = '确定'
+}) {
+  return new Promise((resolve, reject) => { 
+
+    /**
+     * 移除confirm
+     */
+    const closeAfter = () => {
+      render(null, document.body)
+    }
+
+    /**
+     * 点击确定按钮，回调
+     */
+    const handleConfirmClick = resolve
+
+    /**
+     * 点击取消按钮，回调
+     */
+    const handleCancelClick = reject
+
+    // 生成vnode，并传入props
+    const vnode = h(Confirm, {
+      title,
+      content,
+      cancelText,
+      confirmText,
+      closeAfter,
+      handleConfirmClick,
+      handleCancelClick
+    })
+    // 渲染组件到body中
+    render(vnode, document.body)
+  })
+}
+```
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/confirm-component)

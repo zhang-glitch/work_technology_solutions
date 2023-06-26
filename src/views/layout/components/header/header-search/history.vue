@@ -30,12 +30,20 @@
 
 <script setup>
 import { useStore } from 'vuex'
+import createConfirm from '@/libs/confirm'
 
 const emits = defineEmits(['itemClick'])
 const store = useStore()
 // 点击移除全部
 const handleRemoveAll = () => {
-  store.commit('search/removeHistoryWords')
+  // 触发确认，来决定是否删除
+  createConfirm({
+    title: '',
+    content: '你确定要删除全部历史记录吗？'
+  }).then(() => {
+    // 点击了确定
+    store.commit('search/removeHistoryWords')
+  })
 }
 // 点击发出事件，进行搜索
 const handleItemClick = (item) => {
