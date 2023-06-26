@@ -16,6 +16,8 @@
           v-show="!searchValue"
           @itemClick="handleSearchClick"
         ></history-vue>
+        <!-- 热门精选 -->
+        <hot-vue v-show="!searchValue"></hot-vue>
       </template>
     </hm-search>
   </div>
@@ -26,6 +28,7 @@ import { ref } from 'vue'
 import { useStore } from 'vuex'
 import HintVue from './hint.vue'
 import HistoryVue from './history.vue'
+import HotVue from './hot.vue'
 
 const searchValue = ref('')
 const store = useStore()
@@ -37,6 +40,8 @@ const handleSearchClick = (keyword) => {
   searchValue.value = keyword
   // 保存在localStorage中
   store.commit('search/addHistoryWords', keyword)
+  // 保存searchValue到vuex中，让list可以请求数据
+  store.commit('app/setSearchValue', keyword)
 }
 </script>
 

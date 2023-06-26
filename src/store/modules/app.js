@@ -9,12 +9,17 @@ export default {
   state: () => {
     return {
       // 初始值为全部
-      currentCategory: ALL_CATEGORY
+      currentCategory: ALL_CATEGORY,
+      // 搜索文本
+      searchValue: ''
     }
   },
   mutations: {
     setCurrentCategory(state, category) {
       state.currentCategory = category
+    },
+    setSearchValue(state, value) {
+      state.searchValue = value
     }
   },
   actions: {}

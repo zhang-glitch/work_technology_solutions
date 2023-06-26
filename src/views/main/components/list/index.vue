@@ -83,6 +83,19 @@ watch(
     })
   }
 )
+
+/**
+ * 监听searchValue变化，请求列表数据
+ */
+watch(
+  () => store.getters.searchValue,
+  (val) => {
+    resetQuery({
+      page: 1,
+      searchText: val
+    })
+  }
+)
 </script>
 
 <style scoped></style>

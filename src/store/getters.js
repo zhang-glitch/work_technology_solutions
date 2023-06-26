@@ -13,5 +13,7 @@ export default {
     })
   },
   // 历史数据
-  historyWords: (state) => state.search.historyWords
+  historyWords: (state) => state.search.historyWords,
+  // 搜索文本
+  searchValue: (state) => state.app.searchValue
 }
