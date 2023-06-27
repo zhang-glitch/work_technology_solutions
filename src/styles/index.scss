@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+// 解决引导组件的背景覆盖问题
+.driver-fix-stacking {
+  position: relative;
+}
+
+// 解决引导组件按钮未对齐问题
+.driver-navigation-btns {
+  line-height: 0;
+}

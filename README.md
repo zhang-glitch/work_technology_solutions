@@ -726,13 +726,16 @@ const useItemLocation = () => {
 ```
 
 [案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/waterfall-component)
+
 ## 长列表加载组件
-主要是通过监听底部dom是否出现在可视区域，然后做数据请求，处理一些特殊情况。使用到了
-[usevue的useIntersectionObserver api](http://www.vueusejs.com/core/useIntersectionObserver/) ，它就是简单了对 [IntersectionObserver api](https://developer.mozilla.org/zh-CN/docs/Web/API/IntersectionObserver)进行了封装，让我们更轻易地实现可见区域交叉监听。
 
-这个IntersectionObserver 以前写过一篇文章 [《如何判断元素是否在可视区域内呢？然后搞一些事情》](https://juejin.cn/post/7006521586836570126)介绍过，可以看看。
+主要是通过监听底部 dom 是否出现在可视区域，然后做数据请求，处理一些特殊情况。使用到了
+[usevue 的 useIntersectionObserver api](http://www.vueusejs.com/core/useIntersectionObserver/) ，它就是简单了对 [IntersectionObserver api](https://developer.mozilla.org/zh-CN/docs/Web/API/IntersectionObserver)进行了封装，让我们更轻易地实现可见区域交叉监听。
 
-主要提供`isLoading`展示加载更多动态图标， `isFinished`判断数据是否请求完毕， `load`事件请求数据 props即可。
+这个 IntersectionObserver 以前写过一篇文章 [《如何判断元素是否在可视区域内呢？然后搞一些事情》](https://juejin.cn/post/7006521586836570126)介绍过，可以看看。
+
+主要提供`isLoading`展示加载更多动态图标， `isFinished`判断数据是否请求完毕， `load`事件请求数据 props 即可。
+
 ```js
 <script setup>
 import { useVModel, useIntersectionObserver } from '@vueuse/core'
@@ -796,13 +799,17 @@ onUnmounted(() => {
 })
 </script>
 ```
-这里有一个容易出现的bug，当我们数据量一次返回过少时，底部区域一直在可是区域内，我们将不能再次调用`useIntersectionObserver`传入的回调，也就不能再次请求数据，加载更多了。
 
-所以我们需要监听loading的变化，再次触发数据请求。但是这样又有一个问题了。当我们数据一次性加载过多时，我们依旧请求多次数据，这是因为虽然第一次请求的数据回来了，但是界面还没有渲染，这是底部区域依旧在可是区域内，导致数据再一次被请求。所以我们手动延迟数据在watch监听中的请求。
+这里有一个容易出现的 bug，当我们数据量一次返回过少时，底部区域一直在可是区域内，我们将不能再次调用`useIntersectionObserver`传入的回调，也就不能再次请求数据，加载更多了。
+
+所以我们需要监听 loading 的变化，再次触发数据请求。但是这样又有一个问题了。当我们数据一次性加载过多时，我们依旧请求多次数据，这是因为虽然第一次请求的数据回来了，但是界面还没有渲染，这是底部区域依旧在可是区域内，导致数据再一次被请求。所以我们手动延迟数据在 watch 监听中的请求。
 
 [案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/infinite-list-component)
+
 ## 自定义懒加载指令
-也是需要用到[usevue的useIntersectionObserver api](http://www.vueusejs.com/core/useIntersectionObserver/)，首先将src置空，当进入可视区域，我们就将src赋值回去。
+
+也是需要用到[usevue 的 useIntersectionObserver api](http://www.vueusejs.com/core/useIntersectionObserver/)，首先将 src 置空，当进入可视区域，我们就将 src 赋值回去。
+
 ```js
 import { useIntersectionObserver } from '@vueuse/core'
 
@@ -824,7 +831,9 @@ export default {
   }
 }
 ```
-通过[vite的Glob](https://vitejs.cn/guide/features.html#glob-import) 的另一个方法来做到指令自动注册。使用 `import.meta.globEager`，直接引入所有的模块。
+
+通过[vite 的 Glob](https://vitejs.cn/guide/features.html#glob-import) 的另一个方法来做到指令自动注册。使用  `import.meta.globEager`，直接引入所有的模块。
+
 ```js
 export default {
   install(app) {
@@ -837,17 +846,21 @@ export default {
   }
 }
 ```
+
 [案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/infinite-list-component)
-## confirm组件
+
+## confirm 组件
+
 `confirm` 组件的实现思路:
 
-1. 创建一个`confirm`组件 
+1. 创建一个`confirm`组件
 2. 创建一个函数组件，并且返回一个 `promise`
 
-3. 同时利用h函数生成`confirm`组件的`vnode`
+3. 同时利用 h 函数生成`confirm`组件的`vnode`
 4. 最后利用`render`函数，渲染`vnode`到 `body`中
 
-了解了组件的设计思路，我们就需要分析它应该具有的props
+了解了组件的设计思路，我们就需要分析它应该具有的 props
+
 ```js
 const props = defineProps({
   title: {
@@ -883,11 +896,13 @@ const props = defineProps({
   }
 })
 ```
-对于confirm组件来说，我们通过一个响应式数据来控制显示和隐藏实现的动画。
 
-- 在弹出框出现时，我们需要监听挂载的时刻，然后控mask和弹框的显示，不然动画会失效。
+对于 confirm 组件来说，我们通过一个响应式数据来控制显示和隐藏实现的动画。
+
+- 在弹出框出现时，我们需要监听挂载的时刻，然后控 mask 和弹框的显示，不然动画会失效。
 
 - 再点击关闭弹出框时，我们不能立刻让组件卸载，不然动画也会立刻消失，所以我们延时卸载。
+
 ```js
 // 动画时间 状态驱动的动态css
 const actionDuration = '0.5s'
@@ -914,12 +929,15 @@ const handleClose = () => {
   }, actionDuration.replace('0.', '').replace('s', '') * 100)
 }
 ```
+
 函数组件的封装，主要使用`h, render`函数操作。
+
 - `closeAfter`：主要就是在点击任何地方关闭弹框时，卸载组件。
-- `handleConfirmClick`: 主要是点击确认按钮时，让promise状态为fulfilled，让外界使用函数组件时，在then中可以操作确认后的事情。
-- `handleCancelClick`: 主要是点击取消按钮时，让promise状态为rejected，让外界使用函数组件时，在catch中可以操作取消后的事情。
+- `handleConfirmClick`: 主要是点击确认按钮时，让 promise 状态为 fulfilled，让外界使用函数组件时，在 then 中可以操作确认后的事情。
+- `handleCancelClick`: 主要是点击取消按钮时，让 promise 状态为 rejected，让外界使用函数组件时，在 catch 中可以操作取消后的事情。
 
 **后两个函数主要就是为了区分点击了取消还是确认。**
+
 ```js
 import { h, render } from 'vue'
 import Confirm from './index.vue'
@@ -930,8 +948,7 @@ export default function createConfirm({
   cancelText = '取消',
   confirmText = '确定'
 }) {
-  return new Promise((resolve, reject) => { 
-
+  return new Promise((resolve, reject) => {
     /**
      * 移除confirm
      */
@@ -964,11 +981,15 @@ export default function createConfirm({
   })
 }
 ```
-[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/confirm-component)
-## message组件
-message组件的实现和confirm非常类似。
 
-props需要指定弹框时间和类型
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/confirm-component)
+
+## message 组件
+
+message 组件的实现和 confirm 非常类似。
+
+props 需要指定弹框时间和类型
+
 ```js
 const props = defineProps({
   // message 类型
@@ -1000,7 +1021,8 @@ const props = defineProps({
 })
 ```
 
-主要就是弹框的隐藏时机不同。message中，是通过外界传入的时间控制隐藏的。
+主要就是弹框的隐藏时机不同。message 中，是通过外界传入的时间控制隐藏的。
+
 ```js
 const isVisible = ref(false)
 
@@ -1017,13 +1039,14 @@ onMounted(() => {
 
 // 在动画完成后，通过transition组件的after-leave钩子触发组件卸载。
 ```
+
 函数组件实现
+
 ```js
 import { h, render } from 'vue'
 import Message from './index.vue'
 
 export function createMessage({ type, content, delay = 3000 }) {
-
   /**
    * 动画结束时的回调
    */
@@ -1043,12 +1066,16 @@ export function createMessage({ type, content, delay = 3000 }) {
   render(vnode, document.body)
 }
 ```
+
 ## 文件下载
+
 文件下载相关的库
-- 小文件下载:[file-saver](https://github.com/eligrey/FileSaver.js) 
+
+- 小文件下载:[file-saver](https://github.com/eligrey/FileSaver.js)
 - 大文件下载: [streamsaver](https://github.com/jimmywarting/StreamSaver.js)
 
-直接使用api，传入下载路径即可
+直接使用 api，传入下载路径即可
+
 ```js
 import { saveAs } from 'file-saver'
 
@@ -1056,35 +1083,38 @@ const handleDownload = (downloadPath) => {
   saveAs(downloadPath)
 }
 ```
+
 ## 全屏展示
+
 我们知道在原生`dom`上，提供了一些方法来供我们开启或关闭全屏：
 
--   [`Element.requestFullscreen()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Element/requestFullScreen)
--   [`Document.exitFullscreen()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/exitFullscreen)
--   [`Document.fullscreen`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/fullscreen) 返回一个布尔值，表明当前文档是否处于全屏模式。**已弃用**
--   [`Document.fullscreenElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/fullscreenElement) 返回当前文档中正在以全屏模式显示的`Element`节点,没有就返回null。
+- [`Element.requestFullscreen()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Element/requestFullScreen)
+- [`Document.exitFullscreen()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/exitFullscreen)
+- [`Document.fullscreen`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/fullscreen) 返回一个布尔值，表明当前文档是否处于全屏模式。**已弃用**
+- [`Document.fullscreenElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/fullscreenElement) 返回当前文档中正在以全屏模式显示的`Element`节点,没有就返回 null。
 
 #### 一般浏览器
 
 使用`requestFullscreen()`和`exitFullscreen()`来实现
 
-#### 早期版本Chrome浏览器
+#### 早期版本 Chrome 浏览器
 
-基于WebKit内核的浏览器需要添加`webkit`前缀，使用`webkitRequestFullScreen()`和`webkitCancelFullScreen()`来实现。
+基于 WebKit 内核的浏览器需要添加`webkit`前缀，使用`webkitRequestFullScreen()`和`webkitCancelFullScreen()`来实现。
 
-#### 早期版本IE浏览器
+#### 早期版本 IE 浏览器
 
-基于Trident内核的浏览器需要添加`ms`前缀，使用`msRequestFullscreen()`和`msExitFullscreen()`来实现，注意方法里的screen的s为小写形式。
+基于 Trident 内核的浏览器需要添加`ms`前缀，使用`msRequestFullscreen()`和`msExitFullscreen()`来实现，注意方法里的 screen 的 s 为小写形式。
 
 #### 早期版本火狐浏览器
 
-基于Gecko内核的浏览器需要添加`moz`前缀，使用`mozRequestFullScreen()`和`mozCancelFullScreen()`来实现。
+基于 Gecko 内核的浏览器需要添加`moz`前缀，使用`mozRequestFullScreen()`和`mozCancelFullScreen()`来实现。
 
-#### 早期版本Opera浏览器
+#### 早期版本 Opera 浏览器
 
-Opera浏览器需要添加`o`前缀，使用`oRequestFullScreen()`和`oCancelFullScreen()`来实现。
+Opera 浏览器需要添加`o`前缀，使用`oRequestFullScreen()`和`oCancelFullScreen()`来实现。
 
 考虑到兼容性，我们可以使用`usevue`提供的[`useFullscreen` api](http://www.vueusejs.com/core/useFullscreen/)
+
 ```js
 import { useFullscreen } from '@vueuse/core'
 
@@ -1095,3 +1125,97 @@ const handleFullScreen = () => {
   enter()
 }
 ```
+
+## 功能引导实现
+
+我们可以通过[`driver.js` 库](https://driver.employleague.cn/guide/)实现。
+
+定义好对应的引导步骤。
+
+```js
+export default [
+  {
+    // 在哪个元素中高亮
+    element: '.guide-home',
+    // 配置对象
+    popover: {
+      // 标题
+      title: 'logo',
+      // 描述
+      description: '点击可返回首页'
+    }
+  },
+  {
+    element: '.guide-search',
+    popover: {
+      title: '搜索',
+      description: '搜索您期望的图片'
+    }
+  },
+  {
+    element: '.guide-theme',
+    popover: {
+      title: '风格',
+      description: '选择一个您喜欢的风格',
+      // 弹出的位置
+      position: 'left'
+    }
+  },
+  {
+    element: '.guide-my',
+    popover: {
+      title: '账户',
+      description: '这里标记了您的账户信息',
+      position: 'left'
+    }
+  },
+  {
+    element: '.guide-start',
+    popover: {
+      title: '引导',
+      description: '这里可再次查看引导信息',
+      position: 'left'
+    }
+  },
+  {
+    element: '.guide-feedback',
+    popover: {
+      title: '反馈',
+      description: '您的任何不满都可以在这里告诉我们',
+      position: 'left'
+    }
+  }
+]
+```
+
+然后调用 driver 库提供的 api 即可
+
+```js
+import Driver from 'driver.js'
+import 'driver.js/dist/driver.min.css'
+import steps from './steps'
+import { onMounted } from 'vue'
+/**
+ * 引导页处理
+ */
+let driver = null
+onMounted(() => {
+  driver = new Driver({
+    // 禁止点击蒙版关闭
+    allowClose: false,
+    closeBtnText: '关闭',
+    nextBtnText: '下一个',
+    prevBtnText: '上一个'
+  })
+})
+
+/**
+ * 开始引导
+ */
+const handleGuideClick = () => {
+  // 定义引导步骤
+  driver.defineSteps(steps)
+  driver.start()
+}
+```
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/use-driver)

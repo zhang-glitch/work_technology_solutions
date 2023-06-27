@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full">
+  <div class="w-full guide-search">
     <hm-search
       v-model:searchValue="searchValue"
       @handleSearchClick="handleSearchClick"
