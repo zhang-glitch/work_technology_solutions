@@ -25,6 +25,7 @@ import getList from '@/api/list.js'
 import { isMobileTerminal } from '@/utils/flexible'
 import ItemVue from './item.vue'
 import { useStore } from 'vuex'
+import { createMessage } from '@/libs'
 
 let query = {
   // 如果将请求数据数量该小，将不能撑满首屏,将不能再次获取数据
@@ -80,6 +81,10 @@ watch(
     resetQuery({
       page: 1,
       categoryId: currentCategory.id
+    })
+    createMessage({
+      type: 'success',
+      content: '切换'
     })
   }
 )

@@ -30,7 +30,7 @@
 
 <script setup>
 import { useStore } from 'vuex'
-import createConfirm from '@/libs/confirm'
+import { createConfirm } from '@/libs'
 
 const emits = defineEmits(['itemClick'])
 const store = useStore()

@@ -99,6 +99,7 @@ onMounted(() => {
 const handleClose = () => {
   // 当隐藏时才会出现动画
   isVisible.value = false
+  // 也可以直接调用过度组件的钩子 @after-leave="closeAfter"
   setTimeout(() => {
     // 卸载confirm组件
     props.closeAfter()

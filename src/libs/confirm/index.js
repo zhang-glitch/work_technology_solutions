@@ -1,7 +1,7 @@
 import { h, render } from 'vue'
 import Confirm from './index.vue'
 
-export default function createConfirm({
+export function createConfirm({
   title,
   content,
   cancelText = '取消',

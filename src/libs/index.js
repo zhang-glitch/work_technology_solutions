@@ -2,6 +2,9 @@
 // import HmPopup from './popup/index.vue'
 
 import { defineAsyncComponent } from 'vue'
+// 导出函数组件
+export { createConfirm } from './confirm/index'
+export { createMessage } from './message/index'
 
 // const components = [SvgIcon, HmPopup]
 
