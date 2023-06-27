@@ -965,3 +965,133 @@ export default function createConfirm({
 }
 ```
 [案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/confirm-component)
+## message组件
+message组件的实现和confirm非常类似。
+
+props需要指定弹框时间和类型
+```js
+const props = defineProps({
+  // message 类型
+  type: {
+    type: String,
+    required: true,
+    validate(val) {
+      if (types.includes(val)) {
+        return true
+      } else {
+        throw new Error('请传入正确的类型值(error, warn, success)')
+      }
+    }
+  },
+  // message 内容
+  content: {
+    type: String,
+    required: true
+  },
+  // 消息回调，在动画完成后，卸载message
+  closeAfter: {
+    type: Function
+  },
+  // 延时多久删除
+  delay: {
+    type: Number,
+    default: 3000
+  }
+})
+```
+
+主要就是弹框的隐藏时机不同。message中，是通过外界传入的时间控制隐藏的。
+```js
+const isVisible = ref(false)
+
+/**
+ * 为了保证出现时动画展示，我们需要在组件挂载后在显示对应的内容
+ */
+onMounted(() => {
+  isVisible.value = true
+
+  setTimeout(() => {
+    isVisible.value = false
+  }, props.delay)
+})
+
+// 在动画完成后，通过transition组件的after-leave钩子触发组件卸载。
+```
+函数组件实现
+```js
+import { h, render } from 'vue'
+import Message from './index.vue'
+
+export function createMessage({ type, content, delay = 3000 }) {
+
+  /**
+   * 动画结束时的回调
+   */
+  const closeAfter = () => {
+    // message 销毁
+    render(null, document.body)
+  }
+
+  // 生成vnode
+  const vnode = h(Message, {
+    type,
+    content,
+    delay,
+    closeAfter
+  })
+  // 渲染组件
+  render(vnode, document.body)
+}
+```
+## 文件下载
+文件下载相关的库
+- 小文件下载:[file-saver](https://github.com/eligrey/FileSaver.js) 
+- 大文件下载: [streamsaver](https://github.com/jimmywarting/StreamSaver.js)
+
+直接使用api，传入下载路径即可
+```js
+import { saveAs } from 'file-saver'
+
+const handleDownload = (downloadPath) => {
+  saveAs(downloadPath)
+}
+```
+## 全屏展示
+我们知道在原生`dom`上，提供了一些方法来供我们开启或关闭全屏：
+
+-   [`Element.requestFullscreen()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Element/requestFullScreen)
+-   [`Document.exitFullscreen()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/exitFullscreen)
+-   [`Document.fullscreen`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/fullscreen) 返回一个布尔值，表明当前文档是否处于全屏模式。**已弃用**
+-   [`Document.fullscreenElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/fullscreenElement) 返回当前文档中正在以全屏模式显示的`Element`节点,没有就返回null。
+
+#### 一般浏览器
+
+使用`requestFullscreen()`和`exitFullscreen()`来实现
+
+#### 早期版本Chrome浏览器
+
+基于WebKit内核的浏览器需要添加`webkit`前缀，使用`webkitRequestFullScreen()`和`webkitCancelFullScreen()`来实现。
+
+#### 早期版本IE浏览器
+
+基于Trident内核的浏览器需要添加`ms`前缀，使用`msRequestFullscreen()`和`msExitFullscreen()`来实现，注意方法里的screen的s为小写形式。
+
+#### 早期版本火狐浏览器
+
+基于Gecko内核的浏览器需要添加`moz`前缀，使用`mozRequestFullScreen()`和`mozCancelFullScreen()`来实现。
+
+#### 早期版本Opera浏览器
+
+Opera浏览器需要添加`o`前缀，使用`oRequestFullScreen()`和`oCancelFullScreen()`来实现。
+
+考虑到兼容性，我们可以使用`usevue`提供的[`useFullscreen` api](http://www.vueusejs.com/core/useFullscreen/)
+```js
+import { useFullscreen } from '@vueuse/core'
+
+const imgRef = ref(null)
+const { isFullscreen, enter, exit, toggle } = useFullscreen(imgRef)
+const handleFullScreen = () => {
+  imgRef.value.style.backgroundColor = 'transparent'
+  enter()
+}
+```
