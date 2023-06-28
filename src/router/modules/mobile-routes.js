@@ -9,16 +9,16 @@ const routes = [
   //   name: 'pins',
   //   component: () => import('@/views/pins/index.vue')
   // },
-  // {
-  //   path: '/login',
-  //   name: 'login',
-  //   component: () => import('@/views/login-register/login/index.vue')
-  // },
-  // {
-  //   path: '/register',
-  //   name: 'register',
-  //   component: () => import('@/views/login-register/register/index.vue')
-  // },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/login/index.vue')
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import('@/views/register/index.vue')
+  },
   // {
   //   path: '/profile',
   //   name: 'profile',
@@ -55,6 +55,5 @@ const routes = [
   //   redirect: '/404'
   // }
 ]
-
 
 export default routes

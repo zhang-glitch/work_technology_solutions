@@ -1218,4 +1218,181 @@ const handleGuideClick = () => {
   driver.start()
 }
 ```
+
 [案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/use-driver)
+
+## 表单验证
+
+第三方表单校验库： [vee-validate](https://vee-validate.logaretm.com/v4/tutorials/dynamic-form-generator/)。
+
+该库中，提供了三个重要的组件。分别为我们处理表单组件和表单验证错误提示。
+
+```js
+import {
+  Form as VeeForm,
+  Field as VeeField,
+  ErrorMessage as VeeErrorMessage
+} from 'vee-validate'
+```
+
+每个表单项，可以通过`rules`props 绑定验证规则。message 与 field 中的 name 是相对应的。
+
+```html
+<vee-form @submit="handleLogin">
+    <vee-field
+      class="dark:bg-zinc-800 dark:text-zinc-400 border-b-zinc-400 border-b-[1px] w-full outline-0 pb-1 px-1 text-base focus:border-b-main dark:focus:border-b-zinc-200 xl:dark:bg-zinc-900"
+      name="username"
+      :rules="validateUsername"
+      type="text"
+      placeholder="用户名"
+      autocomplete="on"
+      v-model="loginForm.username"
+    />
+    <vee-error-message
+      class="text-sm text-red-600 block mt-0.5 text-left"
+      name="username"
+    >
+</vee-form>
+```
+
+**需要注意的是：验证函数，true 表示表单验证通过， String 表示表单验证未通过，给出的提示文本。**
+
+```js
+/**
+ * 用户名的表单校验
+ */
+export const validateUsername = (value) => {
+  if (!value) {
+    return '用户名为必填的'
+  }
+
+  if (value.length < 3 || value.length > 12) {
+    return '用户名应该在 3-12 位之间'
+  }
+  return true
+}
+```
+
+对于需要依赖别的表单值进行关联验证的，我们需要通过`defineRule`来定义规则。例如：确认密码输入框验证。
+
+```js
+/**
+ * 确认密码的表单校验
+ *
+ * 参数二：表示关联表单值的数组
+ */
+export const validateConfirmPassword = (value, password) => {
+  if (value !== password[0]) {
+    return '两次密码输入必须一致'
+  }
+  return true
+}
+
+/**
+ * 定义关联规则， 例如确认密码
+ */
+defineRule('validateConfirmPassword', validateConfirmPassword)
+```
+
+rule 规则`rules="validateConfirmPassword:@password"`
+
+```html
+<!-- 密码 -->
+<vee-field
+  class="dark:bg-zinc-800 dark:text-zinc-400 border-b-zinc-400 border-b-[1px] w-full outline-0 pb-1 px-1 text-base focus:border-b-main dark:focus:border-b-zinc-200 xl:dark:bg-zinc-900"
+  name="password"
+  type="password"
+  placeholder="密码"
+  autocomplete="on"
+  :rules="validatePassword"
+  v-model="regForm.password"
+/>
+<vee-error-message
+  class="text-sm text-red-600 block mt-0.5 text-left"
+  name="password"
+>
+</vee-error-message>
+<!-- 确认密码 -->
+<vee-field
+  class="dark:bg-zinc-800 dark:text-zinc-400 border-b-zinc-400 border-b-[1px] w-full outline-0 pb-1 px-1 text-base focus:border-b-main dark:focus:border-b-zinc-200 xl:dark:bg-zinc-900"
+  name="confirmPassword"
+  type="password"
+  placeholder="确认密码"
+  autocomplete="on"
+  rules="validateConfirmPassword:@password"
+  v-model="regForm.confirmPassword"
+/>
+<vee-error-message
+  class="text-sm text-red-600 block mt-0.5 text-left"
+  name="confirmPassword"
+>
+</vee-error-message>
+```
+
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/form-verify-and-slider-captcha)
+
+## 人类行为验证
+
+目的：明确当前操作是人完成的，而非机器。
+
+### 原理是什么？
+
+[人机验证是什么？如何实现人机验证？](https://dun.163.com/news/p/d1abbda1d2c8438a90d19a70f2b056ce)
+
+人机验证通过对用户的行为数据、设备特征与网络数据构建多维度数据分析，采用完整的可信前端安全方案保证数据采集的真实性、有效性。
+
+**滑动验证码实现原理是什么？**
+
+滑动验证码是服务端随机生成滑块和带有滑块阴影的背景图片，然后将其随机的滑块位置坐标保存。前端实现互动的交互，将滑块把图拼上，获取用户的相关行为值。然后服务端进行相应值的校验。**其背后的逻辑是使用机器学习中的深度学习，根据鼠标滑动轨迹，坐标位置，计算拖动速度，重试次数等多维度来判断是否人为操作。**
+
+滑动验证码对机器的判断，不只是完成拼图，前端用户看不见的是——验证码后台针对用户产生的行为轨迹数据进行机器学习建模，结合访问频率、地理位置、历史记录等多个维度信息，快速、准确的返回人机判定结果，故而机器识别+模拟不易通过。滑动验证码也不是万无一失，但对滑动行为的模拟需要比较强的破解能力，毕竟还是大幅提升了攻击成本，而且技术也会在攻防转换中不断进步。
+
+### 目前实现的方案有哪些？
+
+分为两种： 一种是收费的、另一种是开源的
+
+**收费的代表有**：
+
+- 1、[网易网盾](https://dun.163.com/)
+- 2、[数美](https://www.ishumei.com/new/product/tw/code?utm_medium=%E6%97%B6%E4%BB%A31-%E9%AA%8C%E8%AF%81%E7%A0%81&utm_campaign=%E9%AA%8C%E8%AF%81%E7%A0%81%E8%AF%8D&utm_content=%E4%BA%BA%E6%9C%BA%E9%AA%8C%E8%AF%81&utm_term=%7Bpa_mt_id%7D&utm_source=bdss1&e_matchtype=2&e_creative=53625341357&e_adposition=cl1&e_pagenum=1&e_keywordid=394337781220&e_keywordid2=376336362893&sdclkid=AL2N15F_15qR15Az&bd_vid=7116999343080641981)
+- 3、[极验](http://www.geetest.com/)
+
+**开源的有**：
+
+- [slideCaptcha](https://gitee.com/LongbowEnterprise/SliderCaptcha?_from=gitee_search)
+
+毫无疑问，就我们学习来说，开源的就是最好的。
+
+该库主要是通过三个方法来进行验证回调操作的。
+
+```js
+let captcha = null
+
+onMounted(() => {
+  captcha = sliderCaptcha({
+    // 绑定的dom元素id名
+    id: 'captcha',
+    // 验证成功的回调 arr滑块移动轨迹
+    async onSuccess(arr) {
+      // 这里将行为轨迹发送到服务端进行验证。
+      const res = await getCaptcha({
+        behavior: arr
+      })
+      // 验证成功发出事件
+      if (res) emits('verifySuccess')
+    },
+    // 验证失败回调
+    onFail() {
+      console.error('人类行为验证失败')
+    },
+    // 默认的验证方法，咱们不在此处进行验证，而是选择在用户拼图成功之后进行验证，所以此处永远返回为 true
+    verify() {
+      return true
+    }
+  })
+})
+```
+
+并且内部提供`reset`方法来修改拼图图片。
+![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dd25187d9dd0447ea956c2b46e8a5bbb~tplv-k3u1fbpfcp-watermark.image?)
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/form-verify-and-slider-captcha)

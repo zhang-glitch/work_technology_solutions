@@ -14,6 +14,7 @@
     "driver.js": "^0.9.8",
     "file-saver": "^2.0.5",
     "md5": "^2.3.0",
+    "vee-validate": "^4.10.2",
     "vue": "^3.2.47",
     "vue-router": "^4.2.2",
     "vuex": "^4.1.0",

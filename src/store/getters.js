@@ -15,5 +15,12 @@ export default {
   // 历史数据
   historyWords: (state) => state.search.historyWords,
   // 搜索文本
-  searchValue: (state) => state.app.searchValue
+  searchValue: (state) => state.app.searchValue,
+  token(state) {
+    return state.user.token
+  },
+  // 用户信息
+  userInfo(state) {
+    return state.user.userInfo
+  }
 }
