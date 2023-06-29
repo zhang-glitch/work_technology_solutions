@@ -1396,3 +1396,167 @@ onMounted(() => {
 并且内部提供`reset`方法来修改拼图图片。
 ![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dd25187d9dd0447ea956c2b46e8a5bbb~tplv-k3u1fbpfcp-watermark.image?)
 [案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/form-verify-and-slider-captcha)
+
+## 图片裁剪
+
+想要学习图片裁剪，我们需要获取图片并展示。在我们点击上传图片如何预览呢？我们来简单介绍一下。
+
+### 图片预览
+
+[以前在学习大文件上传时，介绍过相关的 api](https://juejin.cn/post/7133610879286771742)
+
+- [`URL.createObjectURL()`](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL) 静态方法会创建一个 `DOMString`，其中包含一个表示参数中给出的对象的 URL。这个 URL 的生命周期和创建它的窗口中的 `document` 绑定。这个新的`URL` 对象表示指定的 `File` 对象或 `Blob` 对象。通过`URL.createObjectURL(blob)`可以获取当前文件的一个内存 URL。
+
+- [`FileReader.readAsDataURL(file)`](https://developer.mozilla.org/zh-CN/docs/Web/API/FileReader)，通过`FileReader.readAsDataURL(file)`可以获取一段`data:base64`的字符串。
+
+执行时机：
+
+- `createObjectURL`**是同步执行（立即的）**
+- `FileReader.readAsDataURL**是异步执行（过一段时间）**
+
+内存使用：
+
+- `createObjectURL`返回一段带`hash`的`url`，并且一直存储在内存中，直到`document`触发了`unload`事件（例如：`document close`）或者执行`revokeObjectURL`来释放。
+
+- `FileReader.readAsDataURL`则返回包含很多字符的`base64`，并会比`blob url`消耗更多内存，但是在不用的时候会自动从内存中清除（通过垃圾回收机制） **兼容性方面两个属性都兼容 ie10 以上的浏览器。**
+
+优劣对比：
+
+使用`createObjectURL`可以节省性能并更快速，只不过需要在不使用的情况下手动释放内存 如果不太在意设备性能问题，并想获取图片的`base64`，则推荐使用`FileReader.readAsDataURL`。
+
+### cropperjs 库剪切图片
+
+[cropperjs](https://github.com/fengyuanchen/cropperjs)是一个非常强大的图片裁剪工具，它可以适用于：原生 js，vue，react 等等。而且操作也非常简单、只需要简单几步即可完成图片的裁剪工作。
+
+```js
+import Cropper from 'cropperjs'
+import 'cropperjs/dist/cropper.css'
+
+// 移动端配置对象
+const mobileOptions = {
+  // 将裁剪框限制在画布的大小
+  viewMode: 1,
+  // 移动画布，裁剪框不动
+  dragMode: 'move',
+  // 裁剪框固定纵横比：1:1
+  aspectRatio: 1,
+  // 裁剪框不可移动
+  cropBoxMovable: false,
+  // 不可调整裁剪框大小
+  cropBoxResizable: false
+}
+
+// PC 端配置对象
+const pcOptions = {
+  // 裁剪框固定纵横比：1:1
+  aspectRatio: 1
+}
+
+/**
+ * 图片裁剪处理
+ */
+const imageRef = ref(null)
+let cropper = null
+onMounted(() => {
+  /**
+   * 接收两个参数：
+   * 1. 需要裁剪的图片 DOM
+   * 2. options 配置对象
+   */
+  cropper = new Cropper(
+    imageRef.value,
+    isMobileTerminal.value ? mobileOptions : pcOptions
+  )
+})
+```
+
+然后我们可以通过`cropper.getCroppedCanvas().toBlob`拿到裁剪后的文件对象。
+
+```js
+// 获取裁剪后的图片
+cropper.getCroppedCanvas().toBlob((blob) => {
+  // 裁剪后的 blob 对象
+  console.log(blob)
+})
+```
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/upload-file-use-cropper-and-ali-oss)
+## 图片上传到阿里的 oss 存储
+
+免费获取渠道
+
+- [腾讯云 cos](https://cloud.tencent.com/act/pro/cos?fromSource=gwzcw.7195963.7195963.7195963&utm_medium=cpc&utm_id=gwzcw.7195963.7195963.7195963&bd_vid=10186065120983657886)
+
+- [阿里云 oss](https://free.aliyun.com/?crowd=personal&pipCode=oss&spm=5176.7933691.J_5253785160.4.2e392c47r1jltT)
+
+以阿里云 oss 为例，安装[`ali-oss`](https://help.aliyun.com/document_detail/64041.htm?spm=a2c4g.11186623.0.0.235d24cbqRW0xl#concept-64041-zh)
+封装创建 oss 对象实例方法
+
+```js
+import OSS from 'ali-oss'
+import { REGION, BUCKET } from '@/constants'
+import { getSts } from '@/api/sys'
+
+export const getOSSClient = async () => {
+  const res = await getSts()
+  return new OSS({
+    // yourRegion填写Bucket所在地域。以华东1（杭州）为例，Region填写为oss-cn-hangzhou。
+    region: REGION,
+    // 从STS服务获取的临时访问密钥（AccessKey ID和AccessKey Secret）。
+    accessKeyId: res.Credentials.AccessKeyId,
+    accessKeySecret: res.Credentials.AccessKeySecret,
+    // 从STS服务获取的安全令牌（SecurityToken）。
+    stsToken: res.Credentials.SecurityToken,
+    // 填写Bucket名称。
+    bucket: BUCKET,
+    // 刷新 token，在 token 过期后自动调用（但是并不生效，可能会在后续的版本中修复）
+    refreshSTSToken: async () => {
+      // 向您搭建的STS服务获取临时访问凭证。
+      const res = await getSts()
+      return {
+        accessKeyId: res.Credentials.AccessKeyId,
+        accessKeySecret: res.Credentials.AccessKeySecret,
+        stsToken: res.Credentials.SecurityToken
+      }
+    },
+    // 刷新临时访问凭证的时间间隔，单位为毫秒。
+    refreshSTSTokenInterval: 5 * 1000
+  })
+}
+```
+
+```js
+/**
+ * 上传图片到oss
+ */
+const store = useStore()
+const putObjectToOSS = async (file) => {
+  // 创建oss对象实例
+  const ossClient = await getOSSClient()
+  try {
+    // 因为当前凭证只具备 images 文件夹下的访问权限，所以图片需要上传到 images/xxx.xx 。否则你将得到一个 《AccessDeniedError: You have no right to access this object because of bucket acl.》 的错误
+    const fileTypeArr = file.type.split('/')
+    const fileName = `${store.getters.userInfo.nickname}/${Date.now()}.${
+      fileTypeArr[fileTypeArr.length - 1]
+    }`
+    // 文件存放路径，文件。上传文件对象。并返回对应的图片路径
+    const res = await ossClient.put(`images/${fileName}`, file)
+    // 通知父元素更改图片地址
+    emits('updateImgUrl', res.url)
+    createMessage({
+      type: 'success',
+      content: '图片上传成功'
+    })
+  } catch (e) {
+    createMessage({
+      type: 'error',
+      content: '图片上传失败'
+    })
+  } finally {
+    // 关闭动画
+    loading.value = false
+    // 关闭弹窗
+    handleClose()
+  }
+}
+```
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/upload-file-use-cropper-and-ali-oss)

@@ -43,3 +43,25 @@ export const postRegister = (data) => {
     data
   })
 }
+
+/**
+ * 修改用户信息
+ */
+export const putProfile = (data) => {
+  return request({
+    url: '/user/profile',
+    method: 'PUT',
+    data
+  })
+}
+
+/**
+ * 获取 OSS 上传凭证
+ *
+ * 获取oss一些秘钥参数
+ */
+export const getSts = () => {
+  return request({
+    url: '/user/sts'
+  })
+}

@@ -8,20 +8,21 @@ const routes = [
         path: '',
         name: 'home',
         component: () => import('@/views/main/index.vue')
-      }
+      },
       // {
       //   path: '/pins/:id',
       //   name: 'pins',
       //   component: () => import('@/views/pins/index.vue')
       // },
-      // {
-      //   path: '/profile',
-      //   name: 'profile',
-      //   component: () => import('@/views/profile/index.vue'),
-      //   meta: {
-      //     user: true
-      //   }
-      // },
+      {
+        path: '/profile',
+        name: 'profile',
+        component: () => import('@/views/profile/index.vue'),
+        // 标记只有用户登录了才可以进入的页面
+        meta: {
+          user: true
+        }
+      }
       // {
       //   path: '/member',
       //   name: 'member',

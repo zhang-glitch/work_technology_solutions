@@ -36,3 +36,7 @@ export const CATEGORY_NOMAR_DATA = [
     name: '家居/家装'
   }
 ]
+
+// STS 上传数据
+export const REGION = 'oss-cn-beijing'
+export const BUCKET = 'imooc-front'

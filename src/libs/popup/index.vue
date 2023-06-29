@@ -1,6 +1,6 @@
 <template>
   <teleport to="body">
-    <div class="hm-popup">
+    <div class="hm-popup" v-bind="$attrs">
       <!-- 遮罩层 -->
       <transition name="fade">
         <!-- 显示隐藏不能绑定到最外层，不然动画失效 -->

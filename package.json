@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@vueuse/core": "^10.1.2",
+    "ali-oss": "^6.17.1",
     "axios": "^1.4.0",
+    "cropperjs": "^1.5.13",
     "driver.js": "^0.9.8",
     "file-saver": "^2.0.5",
     "md5": "^2.3.0",

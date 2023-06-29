@@ -19,14 +19,14 @@ const routes = [
     name: 'register',
     component: () => import('@/views/register/index.vue')
   },
-  // {
-  //   path: '/profile',
-  //   name: 'profile',
-  //   component: () => import('@/views/profile/index.vue'),
-  //   meta: {
-  //     user: true
-  //   }
-  // },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('@/views/profile/index.vue'),
+    meta: {
+      user: true
+    }
+  }
   // {
   //   path: '/member',
   //   name: 'member',
