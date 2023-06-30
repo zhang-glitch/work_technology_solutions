@@ -11,7 +11,9 @@ export default {
       // 初始值为全部
       currentCategory: ALL_CATEGORY,
       // 搜索文本
-      searchValue: ''
+      searchValue: '',
+      // 路由跳转类型
+      routerType: 'none'
     }
   },
   mutations: {
@@ -20,6 +22,9 @@ export default {
     },
     setSearchValue(state, value) {
       state.searchValue = value
+    },
+    setRouterType(state, value) {
+      state.routerType = value
     }
   },
   actions: {}

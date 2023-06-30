@@ -86,6 +86,7 @@ const menuArr = [
 // 进入登录
 const handleToLogin = () => {
   // 配置跳转方式
+  store.commit('app/setRouterType', 'push')
   router.push('/login')
 }
 
@@ -96,6 +97,7 @@ const handleItemClick = (path) => {
   // 有路径则进行路径跳转
   if (path) {
     // 配置跳转方式
+    store.commit('app/setRouterType', 'push')
     router.push(path)
     return
   } else {

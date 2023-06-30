@@ -228,6 +228,8 @@ watch(isDialogVisible, (val) => {
  */
 const router = useRouter()
 const handleLeftClick = () => {
+  // 配置跳转方式
+  store.commit('app/setRouterType', 'back')
   router.back()
 }
 

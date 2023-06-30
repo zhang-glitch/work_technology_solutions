@@ -161,6 +161,8 @@ const handleRegisterRequest = async () => {
  */
 const router = useRouter()
 const handleToLogin = () => {
+  // 配置跳转方式
+  store.commit('app/setRouterType', 'push')
   router.push('/login')
 }
 

@@ -1,6 +1,8 @@
 /**
  * 便捷访问每个模块下的数据
  */
+import { isMobileTerminal } from '@/utils/flexible'
+
 export default {
   categorys: (state) => state.category.categorys,
   themeType: (state) => state.theme.themeType,
@@ -22,5 +24,14 @@ export default {
   // 用户信息
   userInfo(state) {
     return state.user.userInfo
+  },
+  // 路由跳转类型
+  routerType(state) {
+    // 移动端
+    if (isMobileTerminal.value) {
+      return state.app.routerType
+    }
+    // pc端直接返回none
+    return 'none'
   }
 }

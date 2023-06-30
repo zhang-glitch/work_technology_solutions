@@ -106,6 +106,8 @@ const loginForm = ref({
  */
 const router = useRouter()
 const handleToRegister = () => {
+  // 配置跳转方式
+  store.commit('app/setRouterType', 'push')
   router.push('/register')
 }
 
