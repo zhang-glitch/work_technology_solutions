@@ -53,9 +53,9 @@ import NavigationVue from './components/navigation/index.vue'
 import ListVue from './components/list/index.vue'
 import { isMobileTerminal } from '@/utils/flexible'
 import { useStore } from 'vuex'
-import { computed } from 'vue'
+import { computed, onActivated, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useScroll } from "@vueuse/core"
+import { useScroll } from '@vueuse/core'
 
 const store = useStore()
 const router = useRouter()
@@ -89,13 +89,13 @@ const handleMyClick = () => {
  * 记录页面滚动位置
  */
 const containerRef = ref(null)
-const { y: containerTargetScrollY } = useScroll(containerRef)
+const { y: containerRefScrollY } = useScroll(containerRef)
 // 被缓存的组件再次可见，会回调 onActivated 方法
 onActivated(() => {
   if (!containerRef.value) {
     return
   }
-  containerRef.value.scrollTop = containerTargetScrollY.value
+  containerRef.value.scrollTop = containerRefScrollY.value
 })
 </script>
 
