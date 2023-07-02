@@ -69,7 +69,9 @@ const handleGuideClick = () => {
   driver.start()
 }
 
-const handleToFeedback = () => {}
+const handleToFeedback = () => {
+  window.open('https://support.qq.com/product/597775', '__blank')
+}
 </script>
 
 <style scoped>

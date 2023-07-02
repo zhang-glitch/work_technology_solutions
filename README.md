@@ -1479,7 +1479,9 @@ cropper.getCroppedCanvas().toBlob((blob) => {
   console.log(blob)
 })
 ```
+
 [案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/upload-file-use-cropper-and-ali-oss)
+
 ## 图片上传到阿里的 oss 存储
 
 免费获取渠道
@@ -1559,11 +1561,14 @@ const putObjectToOSS = async (file) => {
   }
 }
 ```
-[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/upload-file-use-cropper-and-ali-oss)
-## 让h5页面跳转和原生app页面跳转一样流畅
-一般情况下，我们在移动端切换路由时，为了让h5页面跳转可以与原生app媲美，都会使用vue提供的[过度动效](https://router.vuejs.org/zh/guide/advanced/transitions.html)来实现。
 
-主要实现逻辑就是，先定义进入和离开页面的动画，通过路由跳转动态改变transition动画名称。在跳转的时候动态改变缓存组件栈的组件，从而达到组件切换缓存效果。
+[案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/upload-file-use-cropper-and-ali-oss)
+
+## 让 h5 页面跳转和原生 app 页面跳转一样流畅
+
+一般情况下，我们在移动端切换路由时，为了让 h5 页面跳转可以与原生 app 媲美，都会使用 vue 提供的[过度动效](https://router.vuejs.org/zh/guide/advanced/transitions.html)来实现。
+
+主要实现逻辑就是，先定义进入和离开页面的动画，通过路由跳转动态改变 transition 动画名称。在跳转的时候动态改变缓存组件栈的组件，从而达到组件切换缓存效果。
 
 ```js
 <template>
@@ -1747,4 +1752,15 @@ const clearTask = () => {
 }
 </style>
 ```
+
 [案例代码](https://github.com/zhang-glitch/work_technology_solutions/tree/page-router-animation)
+
+## 用户反馈功能
+
+可以通过第三方平台 [兔小巢](https://txc.qq.com/)进行接入。
+
+登录成功后，就可以创建产品。
+
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/bd3b7e75837344ef976216a5c4cab816~tplv-k3u1fbpfcp-watermark.image?)
+
+创建完成后，就会生成一个返回网址。将其接入网站即可。
